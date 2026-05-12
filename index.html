@@ -14,18 +14,22 @@
 <body>
 <iframe id="app" allow="clipboard-read; clipboard-write; camera" title="Strix United"></iframe>
 <script>
-  var BASE = 'https://script.google.com/macros/s/AKfycby3sH3AvnmoZ4H4AK5oYNddTHshoyg5vCqoO34L6v-uMJ9B5I7OcR6yD52aA4A65q-nwg/exec';
-  
-  // Detecta se voltou do OAuth com ?token= na URL
-  var params  = new URLSearchParams(window.location.search);
-  var token   = params.get('token');
-  var src     = token ? BASE + '?token=' + encodeURIComponent(token) : BASE;
+  var BASE   = 'https://script.google.com/macros/s/AKfycby3sH3AvnmoZ4H4AK5oYNddTHshoyg5vCqoO34L6v-uMJ9B5I7OcR6yD52aA4A65q-nwg/exec';
+  var params = new URLSearchParams(window.location.search);
+  var code   = params.get('code');
+  var token  = params.get('token');
 
-  document.getElementById('app').src = src;
-
-  // Limpa o token da URL sem recarregar a página
-  if (token) {
-    window.history.replaceState({}, '', window.location.pathname);
+  if (code) {
+    // Discord redirecionou aqui com ?code= → passa pro iframe processar o OAuth
+    document.getElementById('app').src = BASE + '?code=' + encodeURIComponent(code);
+    window.history.replaceState({}, '', '/');
+  } else if (token) {
+    // Token direto (acesso legado ou manual)
+    document.getElementById('app').src = BASE + '?token=' + encodeURIComponent(token);
+    window.history.replaceState({}, '', '/');
+  } else {
+    // Acesso normal — iframe carrega login/dashboard normalmente
+    document.getElementById('app').src = BASE;
   }
 </script>
 </body>
