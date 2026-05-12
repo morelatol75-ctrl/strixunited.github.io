@@ -14,23 +14,35 @@
 <body>
 <iframe id="app" allow="clipboard-read; clipboard-write; camera" title="Strix United"></iframe>
 <script>
-  var BASE   = 'https://script.google.com/macros/s/AKfycby3sH3AvnmoZ4H4AK5oYNddTHshoyg5vCqoO34L6v-uMJ9B5I7OcR6yD52aA4A65q-nwg/exec';
-  var params = new URLSearchParams(window.location.search);
-  var code   = params.get('code');
-  var token  = params.get('token');
+  var BASE = 'https://script.google.com/macros/s/AKfycby3sH3AvnmoZ4H4AK5oYNddTHshoyg5vCqoO34L6v-uMJ9B5I7OcR6yD52aA4A65q-nwg/exec';
+  var iframe = document.getElementById('app');
 
-  if (code) {
-    // Discord redirecionou aqui com ?code= → passa pro iframe processar o OAuth
-    document.getElementById('app').src = BASE + '?code=' + encodeURIComponent(code);
-    window.history.replaceState({}, '', '/');
-  } else if (token) {
-    // Token direto (acesso legado ou manual)
-    document.getElementById('app').src = BASE + '?token=' + encodeURIComponent(token);
-    window.history.replaceState({}, '', '/');
-  } else {
-    // Acesso normal — iframe carrega login/dashboard normalmente
-    document.getElementById('app').src = BASE;
-  }
+  // ── Escuta mensagens do iframe (token save/clear) ──
+  window.addEventListener('message', function(e) {
+    if (!e.data || typeof e.data !== 'object') return;
+    if (e.data.type === 'strix_tok' && e.data.v) {
+      try { localStorage.setItem('strix_tok', e.data.v); } catch(ex) {}
+    }
+    if (e.data.type === 'strix_clear_tok') {
+      try { localStorage.removeItem('strix_tok'); } catch(ex) {}
+    }
+  });
+
+  // ── Determina o src do iframe ──
+  var params  = new URLSearchParams(window.location.search);
+  var code    = params.get('code');
+  var token   = params.get('token');
+  var stored  = '';
+  try { stored = localStorage.getItem('strix_tok') || ''; } catch(ex) {}
+
+  var src;
+  if (code)        src = BASE + '?code='  + encodeURIComponent(code);
+  else if (token)  src = BASE + '?token=' + encodeURIComponent(token);
+  else if (stored) src = BASE + '?token=' + encodeURIComponent(stored);
+  else             src = BASE;
+
+  iframe.src = src;
+  if (code || token) window.history.replaceState({}, '', '/');
 </script>
 </body>
 </html>
