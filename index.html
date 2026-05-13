@@ -28,7 +28,7 @@
 </style>
 </head>
 <body>
-<div id="splash"><div class="ring"></div></div>
+<div id="splash"><div class="ring"></div><div id="spl-txt" style="font-size:10px;letter-spacing:3px;color:rgba(37,99,235,.45);margin-top:12px;font-family:sans-serif;font-weight:700"></div></div>
 <iframe id="app" allow="clipboard-read; clipboard-write; camera" title="Strix United" style="opacity:0;transition:opacity .3s"></iframe>
 
 <script>
@@ -58,6 +58,7 @@ var code   = params.get('code');
 var token  = params.get('token');
 
 if (code) {
+  document.getElementById('spl-txt').textContent = 'AUTENTICANDO...';
   // ── OAuth: troca code por token via fetch JSON (salva no localStorage first-party) ──
   window.history.replaceState({}, '', '/');
   fetch(BASE + '?action=auth&code=' + encodeURIComponent(code))
